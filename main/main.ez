@@ -1,0 +1,50 @@
+import & use @std, @io, @strings
+import & use "../utils"
+import @arrays
+
+const TEMP_PATH string = "./test_dir"
+
+do main(){
+
+    temp fileCount = count_files(TEMP_PATH)
+    println("File Count: ${fileCount}")
+    temp fileExtensions = get_file_extensions(TEMP_PATH)
+    utils.compile_ext_list()
+    // println(fileExtensions)
+}
+
+do get_dir_content(path string) -> [string] {
+    temp content, readErr = io.read_dir(path)
+    if readErr != nil{
+        println("Error occured trying to read ${path}")
+    } or len(content)  == 0 {
+        println("No content found in provided directory${path}")
+    }
+
+    return content
+}
+
+do count_files(path string) -> uint {
+    temp content = get_dir_content(path)
+    temp count uint = 0
+
+    for_each file in content {
+        count += 1
+    }
+
+    return count
+}
+
+do get_file_extensions(path string) -> [string] {
+    temp content = get_dir_content(path)
+    temp arr [string]
+    temp counter int = 0
+
+    for_each item in content {
+        temp splitExtArr = strings.split(item,".")
+        // println(splitExtArr[1])
+        arrays.append(arr, splitExtArr[1])
+    }
+
+    return arr
+}

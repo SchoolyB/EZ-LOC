@@ -1,0 +1,34 @@
+module utils
+
+import @db, @std, @maps
+
+//Relative path to `ez` command calling location
+const DB_FILE string = "extensions.ezdb"
+
+
+do compile_ext_list() -> map[string:string] {
+	temp exists = db.exists(DB_FILE)
+	if exists == false {
+		panic("File extension database not found!")
+	}
+
+	temp database, openError = db.open(DB_FILE)
+	ensure db.close(DB_FILE)
+
+	if openError != nil {
+		panic("Could not open file extension database!")
+	}
+
+	temp extMap map[string:string] = {}
+	temp ks = db.keys(database)
+
+	//setting the key to the value. Once `db.values()` to EZ is added this wont be neccesarry
+	//https://github.com/SchoolyB/EZ/issues/943
+	for_each key in ks {
+		temp value, _ = db.get(database, key)
+		maps.set(extMap, key, value)
+	}
+
+	std.println(extMap)
+	return extMap
+}
