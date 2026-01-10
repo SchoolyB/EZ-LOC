@@ -1,0 +1,81 @@
+module utils
+
+import & use @std, @io, @strings, @os
+import @arrays
+
+
+do get_dir_content(path string) -> [string] {
+    temp content, readErr = io.read_dir(path)
+    if readErr != nil{
+        println("Error occured trying to read ${path}")
+    } or len(content)  == 0 {
+        println("No content found in provided directory${path}")
+    }
+
+    return content
+}
+
+do count_blank_lines_in_file(file string) -> uint {
+	temp file = os.read_lines(file)
+	if file != "\n"{
+		return 1
+	}
+	return 0
+}
+
+do get_file_count(path string) -> uint {
+    temp content = get_dir_content(path)
+    temp count uint = 0
+
+    for_each file in content {
+        count += 1
+    }
+
+    return count
+}
+
+do get_file_extensions(path string) -> [string] {
+    temp content = get_dir_content(path)
+    temp arr [string]
+    temp counter int = 0
+
+    for_each item in content {
+        temp splitExtArr = strings.split(item,".")
+        // println(splitExtArr[1])
+        arrays.append(arr, splitExtArr[1])
+    }
+
+    return arr
+}
+
+do get_file_names(path string) -> [string]{
+	temp content = get_dir_content(path)
+    temp arr [string]
+    temp counter int = 0
+
+    for_each item in content {
+        temp splitExtArr = strings.split(item,".")
+        arrays.append(arr, splitExtArr[0])
+    }
+
+    return arr
+}
+
+//returns an array of "filename.extensions"
+do get_full_file_names(path string) -> [string]{
+	temp content = get_dir_content(path)
+    return content
+}
+
+do check_if_file_is_empty(file string) -> (bool, Error){
+	temp data, readErr = read_bytes(file)
+	if readErr != nil {
+		return false, error("Fill this in later")
+	} or len(data) > 0 {
+		println("$File: {file} has data")
+		return false, nil
+	}
+
+	println("hi ${len(data)}")
+	return true, nil
+}

@@ -3,8 +3,6 @@ module utils
 import @db, @std, @maps
 
 //Relative path to `ez` command calling location
-const DB_FILE string = "extensions.ezdb"
-
 
 do compile_ext_list() -> map[string:string] {
 	temp exists = db.exists(DB_FILE)
@@ -29,6 +27,5 @@ do compile_ext_list() -> map[string:string] {
 		maps.set(extMap, key, value)
 	}
 
-	std.println(extMap)
 	return extMap
 }

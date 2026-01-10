@@ -1,0 +1,5 @@
+module utils
+
+const EZ_LOC_VERSION string = "0.1.0"
+const DB_FILE string = "extensions.ezdb"
+const TEMP_PATH string = "./test_dir"

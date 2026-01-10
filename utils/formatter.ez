@@ -1,0 +1,45 @@
+module utils
+
+import & use @std, @maps, @arrays
+
+
+do print_loc_box(foundTypes [string], path string){
+	if len(foundTypes) == 0 {
+		println("No code was found in desired dirß")
+		return
+	}
+
+	temp nonEmptyFiles [string]
+	temp allFileNames = get_full_file_names(path)
+
+
+	for_each f in allFileNames{
+		println(f)
+		//FIXME: We are reading the file relative to the call site here
+		// Need to read from actual path e.g ./foo/bar/
+		temp fileIsEmpty, _  = check_if_file_is_empty(f)
+		if fileIsEmpty == false {
+			arrays.append(nonEmptyFiles, f)
+		}
+	}
+	println(nonEmptyFiles)
+
+
+	// const fileTypesAndExtension = compile_ext_list()
+	println()
+	println("| EZ LOC Version: ${EZ_LOC_VERSION}")
+	println("|-------------------------------------------------------")
+	println("| File Type       Pure Code       Comments       Blank")
+	println("|-------------------------------------------------------")
+	for_each ft in foundTypes{
+		println("| ${ft}")
+
+		// temp value = maps.get(fileTypesAndExtension, ft)
+		// temp fileName = "${value}.${ft}"
+		// count_blank_lines_in_file()
+		// println(fileName)
+
+	}
+}
+
+
