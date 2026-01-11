@@ -1,0 +1,9 @@
+module utils
+
+
+
+const LineType enum {
+    CODE = 0,
+    COMMENT,
+    BLANK
+}

@@ -15,12 +15,33 @@ do get_dir_content(path string) -> [string] {
     return content
 }
 
-do count_blank_lines_in_file(file string) -> uint {
-	temp file = os.read_lines(file)
-	if file != "\n"{
-		return 1
+//do get_line_content_of_file(path string, t LineType ) -> [u64] {
+do get_line_content_of_file(path string) {
+    //temp arr u64 = {0,0,0} //[0] code count [1] = comment count [2] = blank count
+    //BUG??: Cannt assign [int] to u64??? ^^^^^
+    temp counter u64 = 0
+
+   	temp lines = io.read_lines(path)
+    println(lines)
+    //println(typeof(lines)) //BUG: Yet another instence of Go types leaking through. lines is type: RETURN_TYPE
+	for_each line in lines{//TODO: once above bug is fixed at lang level this will works
+	    if line == ""{
+			counter += 1
+		}
 	}
-	return 0
+	println(counter)
+
+
+    //#strict
+    //when t{
+    //    is BLANK {
+
+    //    }
+    //    default{}
+    //}
+
+
+
 }
 
 do get_file_count(path string) -> uint {
@@ -70,12 +91,11 @@ do get_full_file_names(path string) -> [string]{
 do check_if_file_is_empty(file string) -> (bool, Error){
 	temp data, readErr = read_bytes(file)
 	if readErr != nil {
-		return false, error("Fill this in later")
+		return false, panic("Error reading file ${file}")
 	} or len(data) > 0 {
-		println("$File: {file} has data")
+		//TODO: //println("$File: {file} has data") //Why the fuck isnt this throwing an error at check time????
 		return false, nil
 	}
 
-	println("hi ${len(data)}")
 	return true, nil
 }

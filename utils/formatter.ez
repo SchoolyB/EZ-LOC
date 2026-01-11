@@ -1,6 +1,6 @@
 module utils
 
-import & use @std, @maps, @arrays
+import & use @std, @maps, @arrays, @strings
 
 
 do print_loc_box(foundTypes [string], path string){
@@ -9,30 +9,31 @@ do print_loc_box(foundTypes [string], path string){
 		return
 	}
 
-	temp nonEmptyFiles [string]
 	temp allFileNames = get_full_file_names(path)
 
-
+	//Append all non emptry files to an array to iterate over below
+	temp nonEmptyFiles [string]
 	for_each f in allFileNames{
-		println(f)
-		//FIXME: We are reading the file relative to the call site here
-		// Need to read from actual path e.g ./foo/bar/
-		temp fileIsEmpty, _  = check_if_file_is_empty(f)
+		temp fileIsEmpty, _  = check_if_file_is_empty("${TEMP_PATH}/${f}")
 		if fileIsEmpty == false {
 			arrays.append(nonEmptyFiles, f)
 		}
 	}
-	println(nonEmptyFiles)
 
-
-	// const fileTypesAndExtension = compile_ext_list()
 	println()
 	println("| EZ LOC Version: ${EZ_LOC_VERSION}")
 	println("|-------------------------------------------------------")
-	println("| File Type       Pure Code       Comments       Blank")
+	println("| File Type       Code       Comments       Blank")
 	println("|-------------------------------------------------------")
 	for_each ft in foundTypes{
-		println("| ${ft}")
+	    for_each elem in nonEmptyFiles {
+			temp extension = strings.split(elem, ".")
+			if extension[1] == ft {
+				println("| ${extension[1]}")
+			}
+			//get_line_content_of_file //BUG: "Didnt call or declare this <- but no error?!?!?!?"
+			get_line_content_of_file("${TEMP_PATH}/${elem}")
+		}
 
 		// temp value = maps.get(fileTypesAndExtension, ft)
 		// temp fileName = "${value}.${ft}"
