@@ -5,7 +5,7 @@ import & use @std, @maps, @arrays, @strings
 
 do print_loc_box(foundTypes [string], path string){
 	if len(foundTypes) == 0 {
-		println("No code was found in desired dirß")
+		println("No code was found in desired dir")
 		return
 	}
 
@@ -29,17 +29,17 @@ do print_loc_box(foundTypes [string], path string){
 	    for_each elem in nonEmptyFiles {
 			temp extension = strings.split(elem, ".")
 			if extension[1] == ft {
-				println("| ${extension[1]}")
+				temp lineArr = get_line_content_of_file("${TEMP_PATH}/${elem}")
+				printf("| ${extension[1]}")
+				printf("               ${lineArr[0]}")
+				printf("             ${lineArr[1]}")
+				printf("            ${lineArr[2]}")
 			}
-			//get_line_content_of_file //BUG: "Didnt call or declare this <- but no error?!?!?!?"
-			get_line_content_of_file("${TEMP_PATH}/${elem}")
+
+			//lineArr[0] //code
+			//lineArr[1] //comments
+			//lineArr[2] //blank
 		}
-
-		// temp value = maps.get(fileTypesAndExtension, ft)
-		// temp fileName = "${value}.${ft}"
-		// count_blank_lines_in_file()
-		// println(fileName)
-
 	}
 }
 

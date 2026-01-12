@@ -1,6 +1,6 @@
 module utils
 
-import @db, @std, @maps
+import @db, @maps
 
 //Relative path to `ez` command calling location
 

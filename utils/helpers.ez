@@ -16,32 +16,72 @@ do get_dir_content(path string) -> [string] {
 }
 
 //do get_line_content_of_file(path string, t LineType ) -> [u64] {
-do get_line_content_of_file(path string) {
-    //temp arr u64 = {0,0,0} //[0] code count [1] = comment count [2] = blank count
-    //BUG??: Cannt assign [int] to u64??? ^^^^^
+do get_line_content_of_file(path string) -> [u64]{
+    temp arr [u64] = {0,0,0} //[0] code count [1] = comment count [2] = blank count
     temp counter u64 = 0
+    temp line string
+    temp throwAwayIndex int
+    temp trimmedContent [string]
 
-   	temp lines = io.read_lines(path)
-    println(lines)
-    //println(typeof(lines)) //BUG: Yet another instence of Go types leaking through. lines is type: RETURN_TYPE
-	for_each line in lines{//TODO: once above bug is fixed at lang level this will works
+
+   	temp lines, _ = io.read_lines(path)
+    temp lineTotal = len(lines)
+    // println(lines)
+
+    //Finding blank lines
+	for_each line in lines{
 	    if line == ""{
 			counter += 1
 		}
 	}
-	println(counter)
+	//Store the number of blank lines in a file in arr
+	arr[2] = counter
+	counter = 0 //reset counter state
 
 
-    //#strict
-    //when t{
-    //    is BLANK {
+	//Due to different file types having different comment syntax I really
+	//needed to write some fucking voodoo. This takes the content of each line from io
+	//trims it and stores in a new dynamic array...
+	//That array will be used below for finding comments. Trust me bro...
+	for_each elem in lines{
+	    arrays.append(trimmedContent, trim_string(elem))
+	}
 
-    //    }
-    //    default{}
-    //}
+	//Finding comments
+	temp currentIndex int = 0
+	for_each line in trimmedContent {
+	    temp endIndex int = len(trimmedContent)
 
+		// Single line comments
+	    if strings.starts_with(line, "/"){ //Hack way to count `//` comments lines
+			counter += 1
+		}
 
+		line = trim_string(line)
 
+		//Multi line
+		if strings.contains(line, "/*")  {
+		    counter += 1
+			currentIndex = arrays.index_of(trimmedContent, line)
+			throwAwayIndex = currentIndex
+			for j in range(currentIndex, len(trimmedContent)){
+			    if trimmedContent[j] == "*/"{
+					line = trimmedContent[j]
+					currentIndex = arrays.index_of(trimmedContent, line)
+					counter +=  currentIndex - throwAwayIndex - 1
+				}
+			}
+		}
+	}
+
+	//Store the number of comment lines in a file in arr
+	arr[1] = counter
+	counter = 0 //Reset state again
+
+	counter = lineTotal - arr[1] - arr[2]
+	arr[0] = counter
+
+    return arr
 }
 
 do get_file_count(path string) -> uint {
@@ -62,7 +102,6 @@ do get_file_extensions(path string) -> [string] {
 
     for_each item in content {
         temp splitExtArr = strings.split(item,".")
-        // println(splitExtArr[1])
         arrays.append(arr, splitExtArr[1])
     }
 
@@ -93,9 +132,13 @@ do check_if_file_is_empty(file string) -> (bool, Error){
 	if readErr != nil {
 		return false, panic("Error reading file ${file}")
 	} or len(data) > 0 {
-		//TODO: //println("$File: {file} has data") //Why the fuck isnt this throwing an error at check time????
 		return false, nil
 	}
 
 	return true, nil
+}
+
+do trim_string(&str string) -> string {
+    str = strings.trim_left(strings.trim_right(str))
+    return str
 }
