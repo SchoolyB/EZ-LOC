@@ -11,7 +11,7 @@ do print_loc_box(foundTypes [string], path string){
 
 	temp allFileNames = get_full_file_names(path)
 
-	//Append all non emptry files to an array to iterate over below
+	//Append all non empty files to an array to iterate over below
 	temp nonEmptyFiles [string]
 	for_each f in allFileNames{
 		temp fileIsEmpty, _  = check_if_file_is_empty("${TEMP_PATH}/${f}")
@@ -20,25 +20,29 @@ do print_loc_box(foundTypes [string], path string){
 		}
 	}
 
+
+
+	//Bug: Currently if there are more than one of a file type this prints the number of times
+	//by the count of file files there are. e.g 2 files, it prints twice
+	temp counter u8 = 0
 	println()
 	println("| EZ LOC Version: ${EZ_LOC_VERSION}")
-	println("|-------------------------------------------------------")
-	println("| File Type       Code       Comments       Blank")
-	println("|-------------------------------------------------------")
+	println("|---------------------------------------------------------------")
+	println("| Type       File Count       Code       Comments       Blank")
+	println("|---------------------------------------------------------------")
 	for_each ft in foundTypes{
+		//FIXME: this is fucked. prob make an array and add contents e.g comment lines together with other files lines???
 	    for_each elem in nonEmptyFiles {
 			temp extension = strings.split(elem, ".")
 			if extension[1] == ft {
 				temp lineArr = get_line_content_of_file("${TEMP_PATH}/${elem}")
-				printf("| ${extension[1]}")
-				printf("               ${lineArr[0]}")
-				printf("             ${lineArr[1]}")
-				printf("            ${lineArr[2]}")
-			}
+				printf("|  ${extension[1]}")
+				printf("             ${get_count_of_specific_files(TEMP_PATH, extension[1])}") //File count
+				printf("             ${lineArr[0]}") //code
+				printf("             ${lineArr[1]}") //comments
+				printf("             ${lineArr[2]}\n") //blank
 
-			//lineArr[0] //code
-			//lineArr[1] //comments
-			//lineArr[2] //blank
+			}
 		}
 	}
 }

@@ -3,3 +3,62 @@ module utils
 const EZ_LOC_VERSION string = "0.1.0"
 const DB_FILE string = "extensions.ezdb"
 const TEMP_PATH string = "./test_dir"
+
+
+
+
+//COMMENT SYNTAX
+//Single line
+// C, C++, JS, TS, Java, C#, Swift, Kotlin, Rust, Go, Dart, Scala, PHP, Objective-C, Groovy, Zig, V, Odin
+const DOUBLE_SLASH string = "//"
+
+// Python, Ruby, Perl, Shell/Bash, R, YAML, Makefile, Nim, Julia, Elixir, PowerShell, Tcl, CMake
+const POUND string = "#"
+
+// SQL, Lua, Haskell, Ada, VHDL, Eiffel
+const DOUBLE_DASH string = "--"
+
+// Lisp, Scheme, Clojure, Assembly (various), INI files |
+const SEMI_COL string = ";"
+
+// MATLAB, Erlang, Prolog, LaTeX
+const PERCENT string = "%"
+
+// VBA, Visual Basic
+const SINGLE_APOSTROPHE string = "'"
+
+//Multi-line
+
+//C, C++, JavaScript, TypeScript, Java, C#, Swift, Kotlin, Rust, Go, Dart, Scala, PHP, Objective-C, Groovy, Zig, V, Odin
+const OPENING_SLASH_STAR string = "/*"
+const CLOSING_SLASH_STAR string = "*/"
+
+//Python
+const OPENING_TRIPLE_QUOTE string = "\"\"\""
+const CLOSING_TRIPLE_QUOTE string = "\"\"\""
+const OPENING_TRIPLE_APOSTROPHE string = "'''"
+const CLOSING_TRIPLE_APOSTROPHE string = "'''"
+
+//Ruby
+const OPENING_EQUALS_BEGIN string = "=begin"
+const CLOSING_EQUALS_END string = "=end"
+
+//Perl
+const OPENING_EQUALS_POD string = "=pod"
+const CLOSING_EQUALS_CUT string = "=cut"
+
+//Lua
+const OPENING_DOUBLE_DASH_BRACKET string = "--[["
+const CLOSING_DOUBLE_BRACKET string = "]]"
+
+//Haskell
+const OPENING_BRACE_DASH string = "{-"
+const CLOSING_DASH_BRACE string = "-}"
+
+//Ada
+const OPENING_PAREN_STAR string = "(*"
+const CLOSING_STAR_PAREN string = "*)"
+
+//MATLAB, Erlang
+const OPENING_PERCENT_BRACE string = "%{"
+const CLOSING_PERCENT_BRACE string = "%}"

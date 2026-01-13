@@ -5,3 +5,17 @@ const LineType enum {
     COMMENT,
     BLANK
 }
+
+const CodeFileType enum {
+    C_CPP = 0
+    PYTHON
+}
+
+//TODO: implement this shit for easier file info tracking
+const CodeFile struct {
+    path string
+    prefix string // files name
+    suffix string // files extension
+    type CodeFileType
+    size int
+}

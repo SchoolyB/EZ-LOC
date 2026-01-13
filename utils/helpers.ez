@@ -15,18 +15,25 @@ do get_dir_content(path string) -> [string] {
     return content
 }
 
-//do get_line_content_of_file(path string, t LineType ) -> [u64] {
+//This worker actucally reads a file(p) and counts
+//Comment lines, Code lines & Blank Lines.
+//Appends those values to an array and returns.
+//do get_line_content_of_file(path string, cf CodeFile) -> [u64]{
 do get_line_content_of_file(path string) -> [u64]{
     temp arr [u64] = {0,0,0} //[0] code count [1] = comment count [2] = blank count
     temp counter u64 = 0
     temp line string
+    temp readError error
     temp throwAwayIndex int
     temp trimmedContent [string]
 
 
-   	temp lines, _ = io.read_lines(path)
+   	temp lines, readErr = io.read_lines(path)
+    if readErr != nil {
+        println("Error occured while trying to read file: ${path}")
+        return {1}
+    }
     temp lineTotal = len(lines)
-    // println(lines)
 
     //Finding blank lines
 	for_each line in lines{
@@ -37,7 +44,6 @@ do get_line_content_of_file(path string) -> [u64]{
 	//Store the number of blank lines in a file in arr
 	arr[2] = counter
 	counter = 0 //reset counter state
-
 
 	//Due to different file types having different comment syntax I really
 	//needed to write some fucking voodoo. This takes the content of each line from io
@@ -84,8 +90,10 @@ do get_line_content_of_file(path string) -> [u64]{
     return arr
 }
 
-do get_file_count(path string) -> uint {
-    temp content = get_dir_content(path)
+//Simply returns a count of contents in the passed in path(p).
+//Can be files or dir
+do get_count_of_all_files(p string) -> uint {
+    temp content = get_dir_content(p)
     temp count uint = 0
 
     for_each file in content {
@@ -95,33 +103,58 @@ do get_file_count(path string) -> uint {
     return count
 }
 
-do get_file_extensions(path string) -> [string] {
-    temp content = get_dir_content(path)
+//Returns the number of files in a path(p) with the passed in file extension(e)
+do get_count_of_specific_files(p string,e string) -> uint {
+    temp content = get_dir_content(p)
+    temp count uint = 0
+    temp fileExt string
+
+    for_each file in content{
+        fileExt = get_single_file_extension(file)
+        if fileExt == strings.lower(e) {
+        count += 1
+        }
+    }
+
+
+    return count
+}
+
+//Returns an array of extensions(WITHOUT names) in the passed in path(p)
+do get_file_extensions(p string) -> [string] {
+    temp content = get_dir_content(p)
     temp arr [string]
-    temp counter int = 0
 
     for_each item in content {
-        temp splitExtArr = strings.split(item,".")
-        arrays.append(arr, splitExtArr[1])
+        arrays.append(arr, get_single_file_extension(item))
     }
 
     return arr
 }
 
-do get_file_names(path string) -> [string]{
-	temp content = get_dir_content(path)
+//Returns an array of file names(WITHOUT extensions) in the passed in path(p)
+do get_file_names(p string) -> [string]{
+	temp content = get_dir_content(p)
     temp arr [string]
-    temp counter int = 0
 
     for_each item in content {
-        temp splitExtArr = strings.split(item,".")
-        arrays.append(arr, splitExtArr[0])
+        arrays.append(arr, get_single_file_name(item))
     }
 
     return arr
 }
 
-//returns an array of "filename.extensions"
+do get_single_file_name(p string) -> string{
+    const arr [string, 2] = strings.split(p, ".")
+    return arr[0]
+}
+
+do get_single_file_extension(p string) -> string{
+    const arr [string, 2] = strings.split(p, ".")
+    return arr[1]
+}
+
+//Returns an array of "filename.extensions"
 do get_full_file_names(path string) -> [string]{
 	temp content = get_dir_content(path)
     return content
@@ -138,7 +171,26 @@ do check_if_file_is_empty(file string) -> (bool, Error){
 	return true, nil
 }
 
-do trim_string(&str string) -> string {
-    str = strings.trim_left(strings.trim_right(str))
-    return str
+//Trims right and left of passed in string(s) and returns it. String is mutated
+do trim_string(&s string) -> string {
+    s = strings.trim_left(strings.trim_right(s))
+    return s
+}
+
+
+do determine_file_single_line_comment(type CodeFileType) -> string {
+    temp comment string
+
+    #strict
+    when type{
+        is C_CPP {
+            comment = "//"
+        }
+        is PYTHON {
+            comment = "#"
+        }
+    }
+
+
+    return comment
 }

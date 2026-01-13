@@ -1,0 +1,10 @@
+module utils
+
+
+//TODO: Finish me. See comment on l:14 of types.ez
+//do CodeFileBuilder(path string) -> CodeFile{
+//    temp cf = new(CodeFile)
+//    cf.path = path
+//    cf.prefix =
+
+//}
