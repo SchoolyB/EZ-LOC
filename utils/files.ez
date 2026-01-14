@@ -1,10 +1,15 @@
 module utils
 
 
-//TODO: Finish me. See comment on l:14 of types.ez
-//do CodeFileBuilder(path string) -> CodeFile{
-//    temp cf = new(CodeFile)
-//    cf.path = path
-//    cf.prefix =
+// TODO: Finish me. See comment on l:14 of types.ez
+do CodeFileBuilder(f string) -> CodeFile{
+   temp cf = new(CodeFile)
 
-//}
+   cf.fullpath = f
+   cf.name = get_single_file_name(f)
+   cf.extension = get_single_file_extension(f)
+   cf.type = get_file_type(f)
+   cf.size = get_file_size(f)
+
+   return copy(cf)
+}

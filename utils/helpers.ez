@@ -1,18 +1,33 @@
 module utils
 
-import & use @std, @io, @strings, @os
-import @arrays
+import @std, @io, @strings, @arrays, @maps
 
 
-do get_dir_content(path string) -> [string] {
-    temp content, readErr = io.read_dir(path)
+// Reads over the passed in path(p) then
+// returns a tuple of two [string].
+// One containing file nams and the other dir name
+do get_dir_content(p string) -> ([string], [string]){
+	temp fs [string] = {}//files
+	temp ds [string] = {}//dirs
+
+    temp content, readErr = io.read_dir(p)
+
+    //Handle this fucking error
     if readErr != nil{
-        println("Error occured trying to read ${path}")
+        std.println("Error occured trying to read ${p}")
+        return ds, fs
     } or len(content)  == 0 {
-        println("No content found in provided directory${path}")
+        std.println("No content found in provided path: ${p}")
+        return ds, fs
     }
 
-    return content
+    for_each c in content {
+    	if io.is_dir(c) == true{
+     		arrays.append(ds, c)
+     	} otherwise {arrays.append(fs, c)}
+    }
+
+    return ds, fs
 }
 
 //This worker actucally reads a file(p) and counts
@@ -30,7 +45,7 @@ do get_line_content_of_file(path string) -> [u64]{
 
    	temp lines, readErr = io.read_lines(path)
     if readErr != nil {
-        println("Error occured while trying to read file: ${path}")
+        std.println("Error occured while trying to read file: ${p}")
         return {1}
     }
     temp lineTotal = len(lines)
@@ -68,12 +83,12 @@ do get_line_content_of_file(path string) -> [u64]{
 		//Multi line
 		if strings.contains(line, "/*")  {
 		    counter += 1
-			currentIndex = arrays.index_of(trimmedContent, line)
+			currentIndex = arrays.index(trimmedContent, line)
 			throwAwayIndex = currentIndex
 			for j in range(currentIndex, len(trimmedContent)){
 			    if trimmedContent[j] == "*/"{
 					line = trimmedContent[j]
-					currentIndex = arrays.index_of(trimmedContent, line)
+					currentIndex = arrays.index(trimmedContent, line)
 					counter +=  currentIndex - throwAwayIndex - 1
 				}
 			}
@@ -92,53 +107,74 @@ do get_line_content_of_file(path string) -> [u64]{
 
 //Simply returns a count of contents in the passed in path(p).
 //Can be files or dir
-do get_count_of_all_files(p string) -> uint {
-    temp content = get_dir_content(p)
-    temp count uint = 0
+do get_count_of_all_files(p string) -> int {
+    temp _, files = get_dir_content(p)
+    temp count int = 0
 
-    for_each file in content {
-        count += 1
-    }
-
-    return count
+    return len(files)
 }
 
-//Returns the number of files in a path(p) with the passed in file extension(e)
-do get_count_of_specific_files(p string,e string) -> uint {
-    temp content = get_dir_content(p)
-    temp count uint = 0
-    temp fileExt string
 
-    for_each file in content{
-        fileExt = get_single_file_extension(file)
-        if fileExt == strings.lower(e) {
-        count += 1
+do get_file_and_dir_count(p string) -> (int, int){
+	temp fCount int = 0
+	temp dCount int = 0
+
+	temp content, readErr = io.read_dir(p)
+	if readErr != nil {
+		std.println("There was an error counting content in path: ${p}")
+		return -1, -1
+	} or len(content) == 0 {
+		std.println("No content was found in path: ${p}")
+		return -2, -2
+	}
+
+	for_each c in content {
+		if io.is_dir(c) == true {
+			dCount +=1
+		} otherwise {
+			fCount +=1
+		}
+	}
+
+
+	return dCount, fCount
+}
+
+//Returns the number of files in a path(p) with the passed in file extension(lookingFor)
+do get_count_of_specific_file_type(p string,lookingFor string) -> int {
+    temp _, files = get_dir_content(p)
+    temp count int = 0
+    temp extension string
+
+    for_each file in files{
+        extension = get_single_file_extension(file)
+        if extension == strings.lower(lookingFor) {
+        	count += 1
         }
     }
-
 
     return count
 }
 
 //Returns an array of extensions(WITHOUT names) in the passed in path(p)
 do get_file_extensions(p string) -> [string] {
-    temp content = get_dir_content(p)
+	temp dirs, files = get_dir_content(p)
     temp arr [string]
 
-    for_each item in content {
-        arrays.append(arr, get_single_file_extension(item))
+    for_each file in files {
+        arrays.append(arr, get_single_file_extension(file))
     }
 
     return arr
 }
 
-//Returns an array of file names(WITHOUT extensions) in the passed in path(p)
+//Returns an array of file names(WITHOUT extensions or path prefixes) in the passed in path(p)
 do get_file_names(p string) -> [string]{
-	temp content = get_dir_content(p)
+temp dirs, files = get_dir_content(p)
     temp arr [string]
 
-    for_each item in content {
-        arrays.append(arr, get_single_file_name(item))
+    for_each file in files {
+        arrays.append(arr, get_single_file_name(file))
     }
 
     return arr
@@ -155,13 +191,13 @@ do get_single_file_extension(p string) -> string{
 }
 
 //Returns an array of "filename.extensions"
-do get_full_file_names(path string) -> [string]{
-	temp content = get_dir_content(path)
-    return content
+do get_full_file_names(p string) -> [string]{
+	temp _ , files = get_dir_content(p)
+    return files
 }
 
-do check_if_file_is_empty(file string) -> (bool, Error){
-	temp data, readErr = read_bytes(file)
+do check_if_file_is_empty(file string) -> (bool, Error) {
+	temp data, readErr = io.read_bytes(file)
 	if readErr != nil {
 		return false, panic("Error reading file ${file}")
 	} or len(data) > 0 {
@@ -171,26 +207,49 @@ do check_if_file_is_empty(file string) -> (bool, Error){
 	return true, nil
 }
 
+//Feature: Add this to EZ stdlib???
 //Trims right and left of passed in string(s) and returns it. String is mutated
 do trim_string(&s string) -> string {
     s = strings.trim_left(strings.trim_right(s))
     return s
 }
 
+do get_file_size(p string) -> byte {
+	temp size, sizeErr = io.file_size(p)
+	if sizeErr != nil {
+		std.println("There was an error getting file: ${p}'s size.")
+	}
 
-do determine_file_single_line_comment(type CodeFileType) -> string {
-    temp comment string
-
-    #strict
-    when type{
-        is C_CPP {
-            comment = "//"
-        }
-        is PYTHON {
-            comment = "#"
-        }
-    }
-
-
-    return comment
+	return size
 }
+
+//Gets and returns CodeFileType based on the passed in extension(ext)
+do get_file_type(ext string) -> CodeFileType {
+	temp t CodeFileType
+	if ext == maps.key(CodeFileMap,C) {
+		t = C
+	} or ext == "c++" || ext == "cpp" { //C++ can be a .c++ file or a .cpp file....dumb
+		t = CPP
+	} or ext == maps.key(CodeFileMap,PYTHON) {
+		t = PYTHON
+	}
+
+	return t
+}
+
+// do determine_file_single_line_comment(type CodeFileType) -> string {
+//     temp comment string
+
+//     #strict
+//     when type{
+//         is C_CPP {
+//             comment = "//"
+//         }
+//         is PYTHON {
+//             comment = "#"
+//         }
+//     }
+
+
+//     return comment
+// }
