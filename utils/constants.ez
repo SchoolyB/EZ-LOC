@@ -62,3 +62,136 @@ const CLOSING_STAR_PAREN string = "*)"
 //MATLAB, Erlang
 const OPENING_PERCENT_BRACE string = "%{"
 const CLOSING_PERCENT_BRACE string = "%}"
+
+//HTML, XML
+const OPENING_HTML_COMMENT string = "<!--"
+const CLOSING_HTML_COMMENT string = "-->"
+
+
+//=============================================================================
+// COMMENT SYNTAX MAPS - Maps file extensions directly to their comment syntax
+//=============================================================================
+
+//Single-line comment map: extension -> comment marker
+const SingleLineCommentMap map[string:string] = {
+    //DOUBLE_SLASH languages
+    "c": "//",
+    "h": "//",
+    "cpp": "//",
+    "cc": "//",
+    "hpp": "//",
+    "cs": "//",
+    "java": "//",
+    "js": "//",
+    "ts": "//",
+    "jsx": "//",
+    "tsx": "//",
+    "go": "//",
+    "rs": "//",
+    "php": "//",
+    "swift": "//",
+    "kt": "//",
+    "scala": "//",
+    "scss": "//",
+    "dart": "//",
+    "zig": "//",
+    "odin": "//",
+    "ez": "//",
+    //POUND languages
+    "py": "#",
+    "rb": "#",
+    "sh": "#",
+    "bash": "#",
+    "yaml": "#",
+    "yml": "#",
+    "ps1": "#",
+    "r": "#",
+    "nim": "#",
+    "pl": "#",
+    "ex": "#",
+    //DOUBLE_DASH languages
+    "lua": "--",
+    "sql": "--",
+    "hs": "--",
+    //SEMI_COLON languages
+    "clj": ";"
+}
+
+//Multi-line comment map: extension -> [opening, closing]
+const MultiLineOpenMap map[string:string] = {
+    //SLASH_STAR languages
+    "c": "/*",
+    "h": "/*",
+    "cpp": "/*",
+    "cc": "/*",
+    "hpp": "/*",
+    "cs": "/*",
+    "java": "/*",
+    "js": "/*",
+    "ts": "/*",
+    "jsx": "/*",
+    "tsx": "/*",
+    "go": "/*",
+    "rs": "/*",
+    "php": "/*",
+    "swift": "/*",
+    "kt": "/*",
+    "scala": "/*",
+    "css": "/*",
+    "scss": "/*",
+    "dart": "/*",
+    "zig": "/*",
+    "odin": "/*",
+    //TRIPLE_QUOTE languages
+    "py": "\"\"\"",
+    //EQUALS_BEGIN languages
+    "rb": "=begin",
+    //DOUBLE_DASH_BRACKET languages
+    "lua": "--[[",
+    //BRACE_DASH languages
+    "hs": "{-",
+    //HTML_COMMENT languages
+    "html": "<!--",
+    "xml": "<!--",
+    //EQUALS_POD languages
+    "pl": "=pod"
+}
+
+const MultiLineCloseMap map[string:string] = {
+    //SLASH_STAR languages
+    "c": "*/",
+    "h": "*/",
+    "cpp": "*/",
+    "cc": "*/",
+    "hpp": "*/",
+    "cs": "*/",
+    "java": "*/",
+    "js": "*/",
+    "ts": "*/",
+    "jsx": "*/",
+    "tsx": "*/",
+    "go": "*/",
+    "rs": "*/",
+    "php": "*/",
+    "swift": "*/",
+    "kt": "*/",
+    "scala": "*/",
+    "css": "*/",
+    "scss": "*/",
+    "dart": "*/",
+    "zig": "*/",
+    "odin": "*/",
+    //TRIPLE_QUOTE languages
+    "py": "\"\"\"",
+    //EQUALS_END languages
+    "rb": "=end",
+    //DOUBLE_BRACKET languages
+    "lua": "]]",
+    //DASH_BRACE languages
+    "hs": "-}",
+    //HTML_COMMENT languages
+    "html": "-->",
+    "xml": "-->",
+    //EQUALS_CUT languages
+    "pl": "=cut"
+}

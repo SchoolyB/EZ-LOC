@@ -1,17 +1,21 @@
 module utils
-import @io
+import @io, @std
+
+do BuildPath(fileName string) -> string {
+    return "${TEMP_PATH}/${fileName}" //TODO: once command line args are implemented remove TEMP_PATH
+}
 
 
-do CodeFileBuilder(p string) -> CodeFile{
-   temp cf = new(CodeFile)
-   temp lines, _ = io.read_lines(p) //TODO: handle err later...
+do BuildCodeFileStruct(p string) -> CodeFile{
+    //std.println("DEBUG BuildCodeFileStruct getting passed: ${p}")
+    temp cf = new(CodeFile)
+    temp lines, _ = io.read_lines(p) //TODO: handle err later...
+    cf.path = p
+    cf.name = get_single_file_name(p)
+    cf.extension = get_single_file_extension(p)
+    cf.type = get_file_type(p)
+    cf.size = get_file_size(p)
+    cf.lineCount = {0,0,0}
 
-   cf.path = p
-   cf.name = get_single_file_name(p)
-   cf.extension = get_single_file_extension(p)
-   cf.type = get_file_type(p)
-   cf.size = get_file_size(p)
-   cf.lineCount = {0,0,0}
-
-   return copy(cf)
+    return copy(cf)
 }

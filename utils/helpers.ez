@@ -33,7 +33,6 @@ do get_dir_content(p string) -> ([string], [string]){
 //This worker actucally reads a file(p) and counts
 //Comment lines, Code lines & Blank Lines.
 //Appends those values to an array and returns.
-//do get_line_content_of_file(path string, cf CodeFile) -> [u64]{
 do get_line_content_of_file(&f CodeFile) -> CodeFile{
     temp arr [u64] = {0,0,0} //[0] code count [1] = comment count [2] = blank count
     temp counter u64 = 0
@@ -70,50 +69,36 @@ do get_line_content_of_file(&f CodeFile) -> CodeFile{
 
 	//----------------------------------Single line comments----------------------------------//
 	temp currentIndex int = 0
+
+	//Look up comment syntax by file extension using the maps in constants.ez
+	//Initialize to empty strings first, then set if extension exists in map
+	temp singleLineCommentToLookFor string
+	temp multiLineOpenCommentToLookFor string
+	temp multiLineClosingCommentToLookFor string
+
+	if maps.contains(SingleLineCommentMap, f.extension) {
+		singleLineCommentToLookFor = maps.get(SingleLineCommentMap, f.extension)
+	}
+	if maps.contains(MultiLineOpenMap, f.extension) {
+		multiLineOpenCommentToLookFor = maps.get(MultiLineOpenMap, f.extension)
+	}
+	if maps.contains(MultiLineCloseMap, f.extension) {
+		multiLineClosingCommentToLookFor = maps.get(MultiLineCloseMap, f.extension)
+	}
+
 	for_each line in trimmedContent {
 	    temp endIndex int = len(trimmedContent)
-		temp singleLineCommentToLookFor string
 
-		#strict
-		when f.type{
-		    is CodeFileType.C{
-				singleLineCommentToLookFor = DOUBLE_SLASH
-			}
-			is CodeFileType.CPP{
-			    singleLineCommentToLookFor = DOUBLE_SLASH
-			}
-			is CodeFileType.PYTHON{
-			    singleLineCommentToLookFor = POUND
-			}
-		}
-
-	    if strings.starts_with(line, singleLineCommentToLookFor){
+		//Only check if we have a valid comment marker (prevents counting all lines when type is unsupported)
+	    if singleLineCommentToLookFor != "" && strings.starts_with(line, singleLineCommentToLookFor){
 			counter += 1
 		}
 
 		//----------------------------------Multi-line comments----------------------------------//
 		line = trim_string(line)
-		temp multiLineOpenCommentToLookFor string
-		temp multiLineClosingCommentToLookFor string
 
-		#strict
-		when f.type {
-		    is CodeFileType.C {
-				multiLineOpenCommentToLookFor = OPENING_SLASH_STAR
-				multiLineClosingCommentToLookFor = CLOSING_SLASH_STAR
-			}
-			is CodeFileType.CPP {
-			    multiLineOpenCommentToLookFor = OPENING_SLASH_STAR
-				multiLineClosingCommentToLookFor = CLOSING_SLASH_STAR
-			}
-			is CodeFileType.PYTHON{
-			    multiLineOpenCommentToLookFor = OPENING_TRIPLE_QUOTE
-				//multiLineClosingCommentToLookFor = CLOSING_TRIPLE_QOUTE
-				multiLineClosingCommentToLookFor = "\"\"\""
-			}
-		}
-
-		if strings.contains(line, multiLineOpenCommentToLookFor)  {
+		//Only check if we have valid comment markers (prevents counting all lines when type is unsupported)
+		if multiLineOpenCommentToLookFor != "" && strings.contains(line, multiLineOpenCommentToLookFor)  {
 		    counter += 1
 			currentIndex = arrays.index(trimmedContent, line)
 			throwAwayIndex = currentIndex
@@ -121,16 +106,24 @@ do get_line_content_of_file(&f CodeFile) -> CodeFile{
 			    if trimmedContent[j] == multiLineClosingCommentToLookFor{
 					line = trimmedContent[j]
 					currentIndex = arrays.index(trimmedContent, line)
-					counter +=  currentIndex - throwAwayIndex - 1
+					//Only add if we have more lines between open and close (prevents negative/overflow)
+					if currentIndex > throwAwayIndex + 1 {
+						counter += currentIndex - throwAwayIndex - 1
+					}
 				}
 			}
 		}
 	}
 
-	//Store the number of comment lines in a file in arr
+	//Store the number of comment lines
 	f.lineCount[1] = counter
-	std.println("f: ${f}") //BUG: accidentally typed: fmt.println()"Basic error printed: ERROR: module 'fmt' not imported") this needs to be addressed
-	//f.lineCount[0] lineTotal - f.lineCount[1] - f.lineCount[2]
+
+	//get actual code lines which is just the total - comments - blanks
+	if lineTotal > f.lineCount[1] + f.lineCount[2] {
+		f.lineCount[0] = lineTotal - f.lineCount[1] - f.lineCount[2]
+	} otherwise {
+		f.lineCount[0] = 0
+	}
 
     return f
 }
@@ -214,8 +207,15 @@ do get_single_file_name(p string) -> string{
     return arr[0]
 }
 
+//BUG: so if we split at the '.' this means if a path is './' or '../'
+// we split at first '.' NOT the '.' between a file name and extension..
+//a workaround is to shift() "" from the array
 do get_single_file_extension(p string) -> string{
-    const arr [string, 2] = strings.split(p, ".")
+    temp arr [string] = strings.split(p, ".")
+    if len(arr) == 3 {
+        arrays.shift(arr)
+    }
+    //std.println("DEBUG get_single_file_extension arr: ${arr}")
     return arr[1]
 }
 

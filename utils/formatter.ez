@@ -1,54 +1,15 @@
 module utils
 
-import & use @std, @maps, @arrays, @strings
-
-
-//do print_loc_box(foundTypes [string], path string){
-//	if len(foundTypes) == 0 {
-//		println("No code was found in desired dir")
-//		return
-//	}
-
-//	temp allFileNames = get_full_file_names(path)
-
-//	//Append all non empty files to an array to iterate over below
-//	temp nonEmptyFiles [string]
-//	for_each f in allFileNames{
-//		temp fileIsEmpty, _  = check_if_file_is_empty("${TEMP_PATH}/${f}")
-//		if fileIsEmpty == false {
-//			arrays.append(nonEmptyFiles, f)
-//		}
-//	}
-
-
-
-//	//Bug: Currently if there are more than one of a file type this prints the number of times
-//	//by the count of file files there are. e.g 2 files, it prints twice
-//	temp counter u8 = 0
-//	println()
-//	println("| EZ LOC Version: ${EZ_LOC_VERSION}")
-//	println("|---------------------------------------------------------------")
-//	println("| Type       File Count       Code       Comments       Blank")
-//	println("|---------------------------------------------------------------")
-//	for_each ft in foundTypes{
-//		//FIXME: this is fucked. prob make an array and add contents e.g comment lines together with other files lines???
-//	    for_each elem in nonEmptyFiles {
-//			temp extension = strings.split(elem, ".")
-//			if extension[1] == ft {
-//				temp file = get_line_content_of_file("${TEMP_PATH}/${elem}")
-//				print("|  ${extension[1]}")
-//				print("             ${get_count_of_specific_file_type(TEMP_PATH, extension[1])}") //File count
-//				print("             ${lineArr[0]}") //code
-//				print("             ${lineArr[1]}") //comments
-//				print("             ${lineArr[2]}\n") //blank
-//			}
-//		}
-//	}
-//}
-
+import & use @std, @maps, @arrays, @strings, @db
 
 do display_loc(p string){
-    temp counter u8 = 0
+    //Open the extensions database to look up language names
+    temp extDB, dbErr = db.open(DB_FILE)
+    if dbErr != nil {
+        println("Error opening extensions database")
+        return
+    }
+
     temp allFileNames = get_full_file_names(p)
 	//Append all non empty files to an array to iterate over below
 	temp nonEmptyFiles [string]
@@ -59,23 +20,108 @@ do display_loc(p string){
 		}
 	}
 
+    temp CodeFileArray [CodeFile]
 
-	//Bug: Currently if there are more than one of a file type this prints the number of times
-	//by the count of file files there are. e.g 2 files, it prints twice
+    temp fileNumCounter int = 0
+    temp extensionsCountedArray [string]
+    temp foo [string]
+    temp extensionCountMap map[string:int]
 
-	println()
-	println("| EZ LOC Version: ${EZ_LOC_VERSION}")
-	println("|---------------------------------------------------------------")
-	println("| Type       File Count       Code       Comments       Blank")
-	println("|---------------------------------------------------------------")
-	    for_each elem in nonEmptyFiles {
-				temp newCodeFile = CodeFileBuilder("${TEMP_PATH}/${elem}")
-				temp file = get_line_content_of_file(newCodeFile)
-				//print("|  ${extension[1]}")
-				//print("             ${get_count_of_specific_file_type(TEMP_PATH, extension[1])}") //File count
-				//print("             ${lineArr[0]}") //code
-				//print("             ${lineArr[1]}") //comments
-				//print("             ${lineArr[2]}\n") //blank
+    //Maps for aggregating stats by extension - this prevents duplicate file type printing
+    temp extensionFileCountMap map[string:int]
+    temp extensionCodeLinesMap map[string:u64]
+    temp extensionCommentLinesMap map[string:u64]
+    temp extensionBlankLinesMap map[string:u64]
 
-		}
+    //build all CodeFile structs and collec extensions
+    for_each elem in nonEmptyFiles {
+        temp newCodeFile = BuildCodeFileStruct(BuildPath(elem))
+        arrays.append(CodeFileArray, newCodeFile)
+
+        //This is going to be used to prevent printing more than one of a given file extension
+        if arrays.contains(extensionsCountedArray, newCodeFile.extension) == false {
+            arrays.append(extensionsCountedArray, newCodeFile.extension)
+            //Maps for this extension
+            maps.set(extensionFileCountMap, newCodeFile.extension, 0)
+            maps.set(extensionCodeLinesMap, newCodeFile.extension, 0)
+            maps.set(extensionCommentLinesMap, newCodeFile.extension, 0)
+            maps.set(extensionBlankLinesMap, newCodeFile.extension, 0)
+        }
+
+        for i in range(0, len(foo)){
+            if foo[i] == newCodeFile.extension{
+                fileNumCounter += 1
+            }
+        }
+
+        maps.set(extensionCountMap, newCodeFile.extension, fileNumCounter)
+    }
+
+    //Get line counts for each file based on extension
+    for_each item in CodeFileArray{
+        temp file = get_line_content_of_file(item)
+
+        temp currentFileCount = maps.get(extensionFileCountMap, file.extension)
+        temp currentCodeLines = maps.get(extensionCodeLinesMap, file.extension)
+        temp currentCommentLines = maps.get(extensionCommentLinesMap, file.extension)
+        temp currentBlankLines = maps.get(extensionBlankLinesMap, file.extension)
+
+        //Add all file's stats to totals
+        maps.set(extensionFileCountMap, file.extension, currentFileCount + 1)
+        maps.set(extensionCodeLinesMap, file.extension, currentCodeLines + file.lineCount[0])
+        maps.set(extensionCommentLinesMap, file.extension, currentCommentLines + file.lineCount[1])
+        maps.set(extensionBlankLinesMap, file.extension, currentBlankLines + file.lineCount[2])
+    }
+
+    println()
+    println("| EZ LOC Version: ${EZ_LOC_VERSION}")
+    println("|---------------------------------------------------------------")
+    println("| Type       File Count       Code       Comments       Blank")
+    println("|---------------------------------------------------------------")
+
+    for_each ext in extensionsCountedArray{
+        temp fileCount = maps.get(extensionFileCountMap, ext)
+        temp codeLines = maps.get(extensionCodeLinesMap, ext)
+        temp commentLines = maps.get(extensionCommentLinesMap, ext)
+        temp blankLines = maps.get(extensionBlankLinesMap, ext)
+
+        //Get a langs name from the db
+        temp langName, found = db.get(extDB, ext)
+        if found == false {
+            //unsupported file just show the extension noo stas
+            println("|  Not Supported (.${ext})")
+        } otherwise {
+            //Shoutout claude code for the padding work below
+            temp padding string = ""
+            temp padLen int = 12 - len(langName)
+            if padLen < 1 {
+                padLen = 1
+            }
+            for i in range(0, padLen) {
+                padding = "${padding} "
+            }
+
+            temp fcPad string = ""
+            temp fcPadLen int = 10 - len("${fileCount}")
+            for i in range(0, fcPadLen) {
+                fcPad = "${fcPad} "
+            }
+
+            temp codePad string = ""
+            temp codePadLen int = 10 - len("${codeLines}")
+            for i in range(0, codePadLen) {
+                codePad = "${codePad} "
+            }
+
+            temp commentPad string = ""
+            temp commentPadLen int = 10 - len("${commentLines}")
+            for i in range(0, commentPadLen) {
+                commentPad = "${commentPad} "
+            }
+
+            println("|  ${langName}${padding}${fcPad}${fileCount}${codePad}${codeLines}${commentPad}${commentLines}          ${blankLines}")
+        }
+    }
+
+    db.close(extDB)
 }
