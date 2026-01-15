@@ -8,7 +8,8 @@ do main(){
  	//get and print file extensions as an array
     temp fileExtensions = get_file_extensions(utils.TEMP_PATH)
     // println(fileExtensions)
-	utils.print_loc_box(fileExtensions, utils.TEMP_PATH)
+	//utils.print_loc_box(fileExtensions, utils.TEMP_PATH)
+	utils.display_loc(utils.TEMP_PATH)
 
 	//get and print file count
     // temp fileCount = get_count_of_all_files(utils.TEMP_PATH)

@@ -34,7 +34,7 @@ do get_dir_content(p string) -> ([string], [string]){
 //Comment lines, Code lines & Blank Lines.
 //Appends those values to an array and returns.
 //do get_line_content_of_file(path string, cf CodeFile) -> [u64]{
-do get_line_content_of_file(path string) -> [u64]{
+do get_line_content_of_file(&f CodeFile) -> CodeFile{
     temp arr [u64] = {0,0,0} //[0] code count [1] = comment count [2] = blank count
     temp counter u64 = 0
     temp line string
@@ -43,21 +43,21 @@ do get_line_content_of_file(path string) -> [u64]{
     temp trimmedContent [string]
 
 
-   	temp lines, readErr = io.read_lines(path)
+   	temp lines, readErr = io.read_lines(f.path)
     if readErr != nil {
         std.println("Error occured while trying to read file: ${p}")
-        return {1}
+        return f
     }
-    temp lineTotal = len(lines)
 
+    temp lineTotal = len(lines)
     //Finding blank lines
 	for_each line in lines{
 	    if line == ""{
 			counter += 1
 		}
 	}
-	//Store the number of blank lines in a file in arr
-	arr[2] = counter
+	//Store the number of blank lines in the struct
+	f.lineCount[2] = counter
 	counter = 0 //reset counter state
 
 	//Due to different file types having different comment syntax I really
@@ -68,25 +68,57 @@ do get_line_content_of_file(path string) -> [u64]{
 	    arrays.append(trimmedContent, trim_string(elem))
 	}
 
-	//Finding comments
+	//----------------------------------Single line comments----------------------------------//
 	temp currentIndex int = 0
 	for_each line in trimmedContent {
 	    temp endIndex int = len(trimmedContent)
+		temp singleLineCommentToLookFor string
 
-		// Single line comments
-	    if strings.starts_with(line, "/"){ //Hack way to count `//` comments lines
+		#strict
+		when f.type{
+		    is CodeFileType.C{
+				singleLineCommentToLookFor = DOUBLE_SLASH
+			}
+			is CodeFileType.CPP{
+			    singleLineCommentToLookFor = DOUBLE_SLASH
+			}
+			is CodeFileType.PYTHON{
+			    singleLineCommentToLookFor = POUND
+			}
+		}
+
+	    if strings.starts_with(line, singleLineCommentToLookFor){
 			counter += 1
 		}
 
+		//----------------------------------Multi-line comments----------------------------------//
 		line = trim_string(line)
+		temp multiLineOpenCommentToLookFor string
+		temp multiLineClosingCommentToLookFor string
 
-		//Multi line
-		if strings.contains(line, "/*")  {
+		#strict
+		when f.type {
+		    is CodeFileType.C {
+				multiLineOpenCommentToLookFor = OPENING_SLASH_STAR
+				multiLineClosingCommentToLookFor = CLOSING_SLASH_STAR
+			}
+			is CodeFileType.CPP {
+			    multiLineOpenCommentToLookFor = OPENING_SLASH_STAR
+				multiLineClosingCommentToLookFor = CLOSING_SLASH_STAR
+			}
+			is CodeFileType.PYTHON{
+			    multiLineOpenCommentToLookFor = OPENING_TRIPLE_QUOTE
+				//multiLineClosingCommentToLookFor = CLOSING_TRIPLE_QOUTE
+				multiLineClosingCommentToLookFor = "\"\"\""
+			}
+		}
+
+		if strings.contains(line, multiLineOpenCommentToLookFor)  {
 		    counter += 1
 			currentIndex = arrays.index(trimmedContent, line)
 			throwAwayIndex = currentIndex
 			for j in range(currentIndex, len(trimmedContent)){
-			    if trimmedContent[j] == "*/"{
+			    if trimmedContent[j] == multiLineClosingCommentToLookFor{
 					line = trimmedContent[j]
 					currentIndex = arrays.index(trimmedContent, line)
 					counter +=  currentIndex - throwAwayIndex - 1
@@ -96,13 +128,11 @@ do get_line_content_of_file(path string) -> [u64]{
 	}
 
 	//Store the number of comment lines in a file in arr
-	arr[1] = counter
-	counter = 0 //Reset state again
+	f.lineCount[1] = counter
+	std.println("f: ${f}") //BUG: accidentally typed: fmt.println()"Basic error printed: ERROR: module 'fmt' not imported") this needs to be addressed
+	//f.lineCount[0] lineTotal - f.lineCount[1] - f.lineCount[2]
 
-	counter = lineTotal - arr[1] - arr[2]
-	arr[0] = counter
-
-    return arr
+    return f
 }
 
 //Simply returns a count of contents in the passed in path(p).
@@ -113,7 +143,6 @@ do get_count_of_all_files(p string) -> int {
 
     return len(files)
 }
-
 
 do get_file_and_dir_count(p string) -> (int, int){
 	temp fCount int = 0
@@ -170,7 +199,7 @@ do get_file_extensions(p string) -> [string] {
 
 //Returns an array of file names(WITHOUT extensions or path prefixes) in the passed in path(p)
 do get_file_names(p string) -> [string]{
-temp dirs, files = get_dir_content(p)
+    temp dirs, files = get_dir_content(p)
     temp arr [string]
 
     for_each file in files {
@@ -220,36 +249,19 @@ do get_file_size(p string) -> byte {
 		std.println("There was an error getting file: ${p}'s size.")
 	}
 
-	return size
+	return byte(size)
 }
 
 //Gets and returns CodeFileType based on the passed in extension(ext)
 do get_file_type(ext string) -> CodeFileType {
 	temp t CodeFileType
-	if ext == maps.key(CodeFileMap,C) {
+	if ext == maps.get(CodeFileMap,CodeFileType.C) {
 		t = C
 	} or ext == "c++" || ext == "cpp" { //C++ can be a .c++ file or a .cpp file....dumb
 		t = CPP
-	} or ext == maps.key(CodeFileMap,PYTHON) {
+	} or ext == maps.get(CodeFileMap, CodeFileType.PYTHON) {
 		t = PYTHON
 	}
 
 	return t
 }
-
-// do determine_file_single_line_comment(type CodeFileType) -> string {
-//     temp comment string
-
-//     #strict
-//     when type{
-//         is C_CPP {
-//             comment = "//"
-//         }
-//         is PYTHON {
-//             comment = "#"
-//         }
-//     }
-
-
-//     return comment
-// }

@@ -15,11 +15,12 @@ const CodeFileType enum {
 
 //TODO: implement this shit for easier file info tracking
 const CodeFile struct {
-    fullpath string
+    path string
     name string // files name
     extension string // files extension
     type CodeFileType
     size byte
+    lineCount [u64]
 }
 
 

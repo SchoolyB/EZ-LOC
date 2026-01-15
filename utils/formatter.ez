@@ -3,14 +3,53 @@ module utils
 import & use @std, @maps, @arrays, @strings
 
 
-do print_loc_box(foundTypes [string], path string){
-	if len(foundTypes) == 0 {
-		println("No code was found in desired dir")
-		return
-	}
+//do print_loc_box(foundTypes [string], path string){
+//	if len(foundTypes) == 0 {
+//		println("No code was found in desired dir")
+//		return
+//	}
 
-	temp allFileNames = get_full_file_names(path)
+//	temp allFileNames = get_full_file_names(path)
 
+//	//Append all non empty files to an array to iterate over below
+//	temp nonEmptyFiles [string]
+//	for_each f in allFileNames{
+//		temp fileIsEmpty, _  = check_if_file_is_empty("${TEMP_PATH}/${f}")
+//		if fileIsEmpty == false {
+//			arrays.append(nonEmptyFiles, f)
+//		}
+//	}
+
+
+
+//	//Bug: Currently if there are more than one of a file type this prints the number of times
+//	//by the count of file files there are. e.g 2 files, it prints twice
+//	temp counter u8 = 0
+//	println()
+//	println("| EZ LOC Version: ${EZ_LOC_VERSION}")
+//	println("|---------------------------------------------------------------")
+//	println("| Type       File Count       Code       Comments       Blank")
+//	println("|---------------------------------------------------------------")
+//	for_each ft in foundTypes{
+//		//FIXME: this is fucked. prob make an array and add contents e.g comment lines together with other files lines???
+//	    for_each elem in nonEmptyFiles {
+//			temp extension = strings.split(elem, ".")
+//			if extension[1] == ft {
+//				temp file = get_line_content_of_file("${TEMP_PATH}/${elem}")
+//				print("|  ${extension[1]}")
+//				print("             ${get_count_of_specific_file_type(TEMP_PATH, extension[1])}") //File count
+//				print("             ${lineArr[0]}") //code
+//				print("             ${lineArr[1]}") //comments
+//				print("             ${lineArr[2]}\n") //blank
+//			}
+//		}
+//	}
+//}
+
+
+do display_loc(p string){
+    temp counter u8 = 0
+    temp allFileNames = get_full_file_names(p)
 	//Append all non empty files to an array to iterate over below
 	temp nonEmptyFiles [string]
 	for_each f in allFileNames{
@@ -21,29 +60,22 @@ do print_loc_box(foundTypes [string], path string){
 	}
 
 
-
 	//Bug: Currently if there are more than one of a file type this prints the number of times
 	//by the count of file files there are. e.g 2 files, it prints twice
-	temp counter u8 = 0
+
 	println()
 	println("| EZ LOC Version: ${EZ_LOC_VERSION}")
 	println("|---------------------------------------------------------------")
 	println("| Type       File Count       Code       Comments       Blank")
 	println("|---------------------------------------------------------------")
-	for_each ft in foundTypes{
-		//FIXME: this is fucked. prob make an array and add contents e.g comment lines together with other files lines???
 	    for_each elem in nonEmptyFiles {
-			temp extension = strings.split(elem, ".")
-			if extension[1] == ft {
-				temp lineArr = get_line_content_of_file("${TEMP_PATH}/${elem}")
-				print("|  ${extension[1]}")
-				print("             ${get_count_of_specific_file_type(TEMP_PATH, extension[1])}") //File count
-				print("             ${lineArr[0]}") //code
-				print("             ${lineArr[1]}") //comments
-				print("             ${lineArr[2]}\n") //blank
-			}
+				temp newCodeFile = CodeFileBuilder("${TEMP_PATH}/${elem}")
+				temp file = get_line_content_of_file(newCodeFile)
+				//print("|  ${extension[1]}")
+				//print("             ${get_count_of_specific_file_type(TEMP_PATH, extension[1])}") //File count
+				//print("             ${lineArr[0]}") //code
+				//print("             ${lineArr[1]}") //comments
+				//print("             ${lineArr[2]}\n") //blank
+
 		}
-	}
 }
-
-

@@ -1,15 +1,17 @@
 module utils
+import @io
 
 
-// TODO: Finish me. See comment on l:14 of types.ez
-do CodeFileBuilder(f string) -> CodeFile{
+do CodeFileBuilder(p string) -> CodeFile{
    temp cf = new(CodeFile)
+   temp lines, _ = io.read_lines(p) //TODO: handle err later...
 
-   cf.fullpath = f
-   cf.name = get_single_file_name(f)
-   cf.extension = get_single_file_extension(f)
-   cf.type = get_file_type(f)
-   cf.size = get_file_size(f)
+   cf.path = p
+   cf.name = get_single_file_name(p)
+   cf.extension = get_single_file_extension(p)
+   cf.type = get_file_type(p)
+   cf.size = get_file_size(p)
+   cf.lineCount = {0,0,0}
 
    return copy(cf)
 }
