@@ -5,193 +5,117 @@ const DB_FILE string = "extensions.ezdb"
 const TEMP_PATH string = "./test_dir"
 
 
-
-
 //COMMENT SYNTAX
-//Single line
-// C, C++, JS, TS, Java, C#, Swift, Kotlin, Rust, Go, Dart, Scala, PHP, Objective-C, Groovy, Zig, V, Odin
 const DOUBLE_SLASH string = "//"
-
-// Python, Ruby, Perl, Shell/Bash, R, YAML, Makefile, Nim, Julia, Elixir, PowerShell, Tcl, CMake
 const POUND string = "#"
-
-// SQL, Lua, Haskell, Ada, VHDL, Eiffel
 const DOUBLE_DASH string = "--"
-
-// Lisp, Scheme, Clojure, Assembly (various), INI files |
-const SEMI_COL string = ";"
-
-// MATLAB, Erlang, Prolog, LaTeX
-const PERCENT string = "%"
-
-// VBA, Visual Basic
 const SINGLE_APOSTROPHE string = "'"
-
-//Multi-line
-
-//C, C++, JavaScript, TypeScript, Java, C#, Swift, Kotlin, Rust, Go, Dart, Scala, PHP, Objective-C, Groovy, Zig, V, Odin
 const OPENING_SLASH_STAR string = "/*"
 const CLOSING_SLASH_STAR string = "*/"
 
-//Python
-const OPENING_TRIPLE_QUOTE string = "\"\"\""
-const CLOSING_TRIPLE_QUOTE string = "\"\"\""
-const OPENING_TRIPLE_APOSTROPHE string = "'''"
-const CLOSING_TRIPLE_APOSTROPHE string = "'''"
-
-//Ruby
-const OPENING_EQUALS_BEGIN string = "=begin"
-const CLOSING_EQUALS_END string = "=end"
-
-//Perl
-const OPENING_EQUALS_POD string = "=pod"
-const CLOSING_EQUALS_CUT string = "=cut"
-
-//Lua
-const OPENING_DOUBLE_DASH_BRACKET string = "--[["
-const CLOSING_DOUBLE_BRACKET string = "]]"
-
-//Haskell
-const OPENING_BRACE_DASH string = "{-"
-const CLOSING_DASH_BRACE string = "-}"
-
-//Ada
-const OPENING_PAREN_STAR string = "(*"
-const CLOSING_STAR_PAREN string = "*)"
-
-//MATLAB, Erlang
-const OPENING_PERCENT_BRACE string = "%{"
-const CLOSING_PERCENT_BRACE string = "%}"
-
-//HTML, XML
-const OPENING_HTML_COMMENT string = "<!--"
-const CLOSING_HTML_COMMENT string = "-->"
 
 
-//=============================================================================
-// COMMENT SYNTAX MAPS - Maps file extensions directly to their comment syntax
-//=============================================================================
-
-//Single-line comment map: extension -> comment marker
+//COMMENT SYNTAX MAPS
 const SingleLineCommentMap map[string:string] = {
-    //DOUBLE_SLASH languages
-    "c": "//",
-    "h": "//",
-    "cpp": "//",
-    "cc": "//",
-    "hpp": "//",
-    "cs": "//",
-    "java": "//",
-    "js": "//",
-    "ts": "//",
-    "jsx": "//",
-    "tsx": "//",
-    "go": "//",
-    "rs": "//",
-    "php": "//",
-    "swift": "//",
-    "kt": "//",
-    "scala": "//",
-    "scss": "//",
-    "dart": "//",
-    "zig": "//",
-    "odin": "//",
-    "ez": "//",
-    //POUND languages
-    "py": "#",
-    "rb": "#",
-    "sh": "#",
-    "bash": "#",
-    "yaml": "#",
-    "yml": "#",
-    "ps1": "#",
-    "r": "#",
-    "nim": "#",
-    "pl": "#",
-    "ex": "#",
-    //DOUBLE_DASH languages
-    "lua": "--",
-    "sql": "--",
-    "hs": "--",
-    //SEMI_COLON languages
+    "c": DOUBLE_SLASH,
+    "h": DOUBLE_SLASH,
+    "cpp": DOUBLE_SLASH,
+    "cc": DOUBLE_SLASH,
+    "hpp": DOUBLE_SLASH,
+    "cs": DOUBLE_SLASH,
+    "java": DOUBLE_SLASH,
+    "js": DOUBLE_SLASH,
+    "ts": DOUBLE_SLASH,
+    "jsx": DOUBLE_SLASH,
+    "tsx": DOUBLE_SLASH,
+    "go": DOUBLE_SLASH,
+    "rs": DOUBLE_SLASH,
+    "php": DOUBLE_SLASH,
+    "swift": DOUBLE_SLASH,
+    "kt": DOUBLE_SLASH,
+    "scala": DOUBLE_SLASH,
+    "scss": DOUBLE_SLASH,
+    "dart": DOUBLE_SLASH,
+    "zig": DOUBLE_SLASH,
+    "odin": DOUBLE_SLASH,
+    "ez": DOUBLE_SLASH,
+    "py": DOUBLE_SLASH,
+    "rb": DOUBLE_SLASH,
+    "sh": DOUBLE_SLASH,
+    "bash": DOUBLE_SLASH,
+    "yaml": DOUBLE_SLASH,
+    "yml": DOUBLE_SLASH,
+    "ps1": DOUBLE_SLASH,
+    "r": DOUBLE_SLASH,
+    "nim": DOUBLE_SLASH,
+    "pl": DOUBLE_SLASH,
+    "ex": DOUBLE_SLASH,
+    "lua": DOUBLE_DASH,
+    "sql": DOUBLE_DASH,
+    "hs": DOUBLE_DASH,
     "clj": ";"
 }
 
-//Multi-line comment map: extension -> [opening, closing]
 const MultiLineOpenMap map[string:string] = {
-    //SLASH_STAR languages
-    "c": "/*",
-    "h": "/*",
-    "cpp": "/*",
-    "cc": "/*",
-    "hpp": "/*",
-    "cs": "/*",
-    "java": "/*",
-    "js": "/*",
-    "ts": "/*",
-    "jsx": "/*",
-    "tsx": "/*",
-    "go": "/*",
-    "rs": "/*",
-    "php": "/*",
-    "swift": "/*",
-    "kt": "/*",
-    "scala": "/*",
-    "css": "/*",
-    "scss": "/*",
-    "dart": "/*",
-    "zig": "/*",
-    "odin": "/*",
-    //TRIPLE_QUOTE languages
+    "c": OPENING_SLASH_STAR,
+    "h": OPENING_SLASH_STAR,
+    "cpp": OPENING_SLASH_STAR,
+    "cc": OPENING_SLASH_STAR,
+    "hpp": OPENING_SLASH_STAR,
+    "cs": OPENING_SLASH_STAR,
+    "java": OPENING_SLASH_STAR,
+    "js": OPENING_SLASH_STAR,
+    "ts": OPENING_SLASH_STAR,
+    "jsx": OPENING_SLASH_STAR,
+    "tsx": OPENING_SLASH_STAR,
+    "go": OPENING_SLASH_STAR,
+    "rs": OPENING_SLASH_STAR,
+    "php": OPENING_SLASH_STAR,
+    "swift": OPENING_SLASH_STAR,
+    "kt": OPENING_SLASH_STAR,
+    "scala": OPENING_SLASH_STAR,
+    "css": OPENING_SLASH_STAR,
+    "scss": OPENING_SLASH_STAR,
+    "dart": OPENING_SLASH_STAR,
+    "zig": OPENING_SLASH_STAR,
+    "odin": OPENING_SLASH_STAR,
     "py": "\"\"\"",
-    //EQUALS_BEGIN languages
     "rb": "=begin",
-    //DOUBLE_DASH_BRACKET languages
     "lua": "--[[",
-    //BRACE_DASH languages
     "hs": "{-",
-    //HTML_COMMENT languages
     "html": "<!--",
     "xml": "<!--",
-    //EQUALS_POD languages
     "pl": "=pod"
 }
 
 const MultiLineCloseMap map[string:string] = {
-    //SLASH_STAR languages
-    "c": "*/",
-    "h": "*/",
-    "cpp": "*/",
-    "cc": "*/",
-    "hpp": "*/",
-    "cs": "*/",
-    "java": "*/",
-    "js": "*/",
-    "ts": "*/",
-    "jsx": "*/",
-    "tsx": "*/",
-    "go": "*/",
-    "rs": "*/",
-    "php": "*/",
-    "swift": "*/",
-    "kt": "*/",
-    "scala": "*/",
-    "css": "*/",
-    "scss": "*/",
-    "dart": "*/",
-    "zig": "*/",
-    "odin": "*/",
-    //TRIPLE_QUOTE languages
+    "c": CLOSING_SLASH_STAR,
+    "h": CLOSING_SLASH_STAR,
+    "cpp": CLOSING_SLASH_STAR,
+    "cc": CLOSING_SLASH_STAR,
+    "hpp": CLOSING_SLASH_STAR,
+    "cs": CLOSING_SLASH_STAR,
+    "java": CLOSING_SLASH_STAR,
+    "js": CLOSING_SLASH_STAR,
+    "ts": CLOSING_SLASH_STAR,
+    "jsx": CLOSING_SLASH_STAR,
+    "tsx": CLOSING_SLASH_STAR,
+    "go": CLOSING_SLASH_STAR,
+    "rs": CLOSING_SLASH_STAR,
+    "php": CLOSING_SLASH_STAR,
+    "swift": CLOSING_SLASH_STAR,
+    "kt": CLOSING_SLASH_STAR,
+    "scala": CLOSING_SLASH_STAR,
+    "css": CLOSING_SLASH_STAR,
+    "scss": CLOSING_SLASH_STAR,
+    "dart": CLOSING_SLASH_STAR,
+    "zig": CLOSING_SLASH_STAR,
+    "odin": CLOSING_SLASH_STAR,
     "py": "\"\"\"",
-    //EQUALS_END languages
     "rb": "=end",
-    //DOUBLE_BRACKET languages
     "lua": "]]",
-    //DASH_BRACE languages
     "hs": "-}",
-    //HTML_COMMENT languages
     "html": "-->",
     "xml": "-->",
-    //EQUALS_CUT languages
     "pl": "=cut"
 }
