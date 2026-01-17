@@ -1,5 +1,5 @@
 module utils
-import @io, @std
+import @io
 
 do BuildPath(fileName string) -> string {
     return "${TEMP_PATH}/${fileName}" //TODO: once command line args are implemented remove TEMP_PATH

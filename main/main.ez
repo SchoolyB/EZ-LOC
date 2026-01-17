@@ -1,28 +1,9 @@
-import & use @std, @io, @strings
-import & use "../utils"
+import @std, @os
+import "../utils"
 
 
 
 do main(){
-	// temp _ = get_full_file_names(utils.TEMP_PATH)
- 	//get and print file extensions as an array
-    temp fileExtensions = get_file_extensions(utils.TEMP_PATH)
-    // println(fileExtensions)
-	//utils.print_loc_box(fileExtensions, utils.TEMP_PATH)
 	utils.display_loc(utils.TEMP_PATH)
-
-	//get and print file count
-    // temp fileCount = get_count_of_all_files(utils.TEMP_PATH)
-    // println("File Count: ${fileCount}")
-
-    //get file names
-    // temp fileNames = get_file_names(utils.TEMP_PATH)
-    // println(fileNames)
-
-
-
-    //get and print file type names and extensions in the extensions.db file.
-
-
 }
 
